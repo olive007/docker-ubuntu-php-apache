@@ -1,0 +1,5 @@
+# Ignore every public ssh key
+*.pub
+# Ignore emacs tmp file
+*~
+\#*#
