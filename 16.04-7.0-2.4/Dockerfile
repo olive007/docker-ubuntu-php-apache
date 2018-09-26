@@ -1,10 +1,10 @@
 ARG CONTAINER_USER
-FROM olive007/ubuntu:18.04
+FROM olive007/ubuntu:16.04
 MAINTAINER SECRET Olivier (olivier@devolive.be)
 
-ARG PHP_VERSION=7.2
+ARG PHP_VERSION=7.0
 
-# Install php7.2 and apache2
+# Install php7.0 and apache2
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
                                    apt-get upgrade -y -qq &&                      \
                                    apt-get install -y -qq --no-install-recommends \
@@ -72,5 +72,11 @@ RUN echo "chown $CONTAINER_USER_NAME:$CONTAINER_USER_NAME /var/www/*"
 RUN echo "echo \"ServerName \"`hostname -i` >> /etc/apache2/apache2.conf" >> /usr/local/script/startup.sh
 
 # Enable services
-RUN echo "ln -s /var/www/html /home/$CONTAINER_USER_NAME/www" >> /usr/local/script/startup.sh && \
+RUN echo "ln -s /var/www/html /home/\$CONTAINER_USER_NAME/www" >> /usr/local/script/startup.sh && \
+    echo "chown \$CONTAINER_USER_NAME:\$CONTAINER_USER_NAME /var/www/*" >> /usr/local/script/startup.sh && \
+    echo "XDEBUG_HOST=`hostname -i | cut -d. -f1-3`.1" >> /usr/local/script/startup.sh  && \
+    echo "echo \"xdebug.remote_enable=on\" >> /etc/php/${PHP_VERSION}/apache2/conf.d/20-xdebug.ini" >> /usr/local/script/startup.sh  && \
+    echo "echo \"xdebug.idekey=PHPSTORM\" >> /etc/php/${PHP_VERSION}/apache2/conf.d/20-xdebug.ini" >> /usr/local/script/startup.sh  && \
+    echo "echo \"xdebug.remote_host=\$XDEBUG_HOST\" >> /etc/php/${PHP_VERSION}/apache2/conf.d/20-xdebug.ini" >> /usr/local/script/startup.sh  && \
+    echo "echo \"xdebug.remote_port=9000\" >> /etc/php/${PHP_VERSION}/apache2/conf.d/20-xdebug.ini" >> /usr/local/script/startup.sh  && \
     echo "service apache2 start" >> /usr/local/script/startup.sh
