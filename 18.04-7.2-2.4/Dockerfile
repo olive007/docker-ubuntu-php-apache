@@ -1,4 +1,3 @@
-ARG CONTAINER_USER
 FROM olive007/ubuntu:18.04
 MAINTAINER SECRET Olivier (olivier@devolive.be)
 
@@ -70,6 +69,9 @@ RUN echo "Listen 88" >> /etc/apache2/ports.conf && a2ensite 000-info
 RUN a2enmod info proxy_fcgi
 # Disable php to use php-fpm
 RUN a2dismod php$PHP_VERSION && a2enconf php$PHP_VERSION-fpm
+
+# Display the php error on the web page
+RUN sed -i 's/^display_errors = .*$/display_errors = On/' /etc/php/7.2/fpm/php.ini
 
 # Fix PHP-FPM Error (unable to connect to Unix domain socket /run/php/php7.2-fpm.sock)
 RUN mkdir /run/php
