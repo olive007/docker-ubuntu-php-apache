@@ -10,5 +10,8 @@ echo "xdebug.remote_host=$XDEBUG_HOST" >> /etc/php/$PHP_VERSION/apache2/conf.d/2
 echo "xdebug.remote_port=9000" >> /etc/php/$PHP_VERSION/apache2/conf.d/20-xdebug.ini
 
 # Configure the user for PHP FPM
-echo "listen.owner = $CONTAINER_USER_NAME" >> /etc/php/$PHP_VERSION/fpm/pool.d/www.conf
-echo "listen.group = $CONTAINER_USER_NAME" >> /etc/php/$PHP_VERSION/fpm/pool.d/www.conf
+sed -i "s/^user =.*$/user = $CONTAINER_USER_NAME/" /etc/php/$PHP_VERSION/fpm/pool.d/www.conf
+sed -i "s/^group =.*$/group = $CONTAINER_USER_NAME/" /etc/php/$PHP_VERSION/fpm/pool.d/www.conf
+
+sed -i "s/^listen.owner =.*$/listen.owner = $CONTAINER_USER_NAME/" /etc/php/$PHP_VERSION/fpm/pool.d/www.conf
+sed -i "s/^listen.group =.*$/listen.group = $CONTAINER_USER_NAME/" /etc/php/$PHP_VERSION/fpm/pool.d/www.conf
