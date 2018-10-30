@@ -1,4 +1,3 @@
-ARG CONTAINER_USER
 FROM olive007/ubuntu:16.04
 MAINTAINER SECRET Olivier (olivier@devolive.be)
 
@@ -6,8 +5,8 @@ ARG PHP_VERSION=7.0
 
 # Install php7.0 and apache2
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
-                                   apt-get upgrade -y -qq &&                      \
-                                   apt-get install -y -qq --no-install-recommends \
+    DEBIAN_FRONTEND=noninteractive apt-get upgrade -y -qq && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
 						   apache2 \
 						   locales \
 						   php-xdebug \
@@ -51,32 +50,49 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
 						   snmp-mibs-downloader # php-snmp dependency
 
 # Install Composer
-RUN wget -q https://getcomposer.org/installer -O/tmp/composer-setup.php && \
-    [ `sha384sum /tmp/composer-setup.php | cut -d' ' -f1` = `wget -q -O - https://composer.github.io/installer.sig` ] && \
-    cat /tmp/composer-setup.php | php -- --install-dir=/usr/local/bin --filename=composer && \
-    rm /tmp/composer-setup.php
-
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Customize apache configuration
-RUN echo "export APACHE_RUN_USER=$CONTAINER_USER_NAME" >> /etc/apache2/envvars
-RUN echo "export APACHE_RUN_GROUP=$CONTAINER_USER_NAME" >> /etc/apache2/envvars
 
-RUN rm -rf /var/www/html/*
+RUN rm -rf /var/www/*
+# Here the user have to define a volume into /var/www/html
 VOLUME /var/www/html
 
-# Change the permission of everything which is under /var/www
-RUN echo "chown $CONTAINER_USER_NAME:$CONTAINER_USER_NAME /var/www/*"
+# Add file to get server information
+RUN mkdir /var/www/info
+ADD var/www/info/index.html /var/www/info/index.html
+ADD var/www/info/phpinfo.php /var/www/info/phpinfo.php
 
-# Remove the apache warning
-RUN echo "echo \"ServerName \"`hostname -i` >> /etc/apache2/apache2.conf" >> /usr/local/script/startup.sh
+# Add configuration file for apache
+ADD etc/apache2/sites-available/000-info.conf /etc/apache2/sites-available/000-info.conf
+RUN echo "Listen 88" >> /etc/apache2/ports.conf && a2ensite 000-info
+
+# Enable
+# - proxy_fcgi (php-fpm depency)
+# - info to get information on ADDR_IP:88/apache
+RUN a2enmod info proxy_fcgi
+# Disable php to use php-fpm
+RUN a2dismod php$PHP_VERSION && a2enconf php$PHP_VERSION-fpm
+
+# Display the php error on the web page
+RUN sed -i 's/^display_errors = .*$/display_errors = On/' /etc/php/7.0/fpm/php.ini
+
+# Fix PHP-FPM Error (unable to connect to Unix domain socket /run/php/php7.0-fpm.sock)
+RUN mkdir /run/php
+
+
+# Add script configuration for apache and php
+ADD usr/local/script/entry-point.d/apache.sh /usr/local/script/entry-point.d/apache.sh
+ADD usr/local/script/entry-point.d/php.sh /usr/local/script/entry-point.d/php.sh
+
 
 # Enable services
-RUN echo "ln -s /var/www/html /home/\$CONTAINER_USER_NAME/www" >> /usr/local/script/startup.sh && \
-    echo "chown \$CONTAINER_USER_NAME:\$CONTAINER_USER_NAME /var/www/*" >> /usr/local/script/startup.sh && \
-    echo "XDEBUG_HOST=`hostname -i | cut -d. -f1-3`.1" >> /usr/local/script/startup.sh  && \
-    echo "echo \"xdebug.remote_enable=on\" >> /etc/php/${PHP_VERSION}/apache2/conf.d/20-xdebug.ini" >> /usr/local/script/startup.sh  && \
-    echo "echo \"xdebug.idekey=PHPSTORM\" >> /etc/php/${PHP_VERSION}/apache2/conf.d/20-xdebug.ini" >> /usr/local/script/startup.sh  && \
-    echo "echo \"xdebug.remote_host=\$XDEBUG_HOST\" >> /etc/php/${PHP_VERSION}/apache2/conf.d/20-xdebug.ini" >> /usr/local/script/startup.sh  && \
-    echo "echo \"xdebug.remote_port=9000\" >> /etc/php/${PHP_VERSION}/apache2/conf.d/20-xdebug.ini" >> /usr/local/script/startup.sh  && \
-    echo "service apache2 start" >> /usr/local/script/startup.sh
+RUN echo "service php$PHP_VERSION-fpm start" >> /usr/local/script/startup.sh
+RUN echo "service apache2 start" >> /usr/local/script/startup.sh
+
+
+# Stop SSH service with the container-stopped script
+RUN echo "service ssh stop" >> /usr/local/script/container-stopped.sh
+
+
+# Define Environment variable
+ENV XDEBUG_IDEKEY=PHPSTORM

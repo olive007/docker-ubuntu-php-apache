@@ -65,7 +65,9 @@ ADD var/www/info/phpinfo.php /var/www/info/phpinfo.php
 ADD etc/apache2/sites-available/000-info.conf /etc/apache2/sites-available/000-info.conf
 RUN echo "Listen 88" >> /etc/apache2/ports.conf && a2ensite 000-info
 
-# Enable php-fpm depencies and info to get information on ADDR_IP:88/apache
+# Enable
+# - proxy_fcgi (php-fpm depency)
+# - info to get information on ADDR_IP:88/apache
 RUN a2enmod info proxy_fcgi
 # Disable php to use php-fpm
 RUN a2dismod php$PHP_VERSION && a2enconf php$PHP_VERSION-fpm
@@ -83,8 +85,12 @@ ADD usr/local/script/entry-point.d/php.sh /usr/local/script/entry-point.d/php.sh
 
 
 # Enable services
-RUN echo "service php$PHP_VERSION-fpm restart" >> /usr/local/script/startup.sh
-RUN echo "service apache2 restart" >> /usr/local/script/startup.sh
+RUN echo "service php$PHP_VERSION-fpm start" >> /usr/local/script/startup.sh
+RUN echo "service apache2 start" >> /usr/local/script/startup.sh
+
+
+# Stop SSH service with the container-stopped script
+RUN echo "service ssh stop" >> /usr/local/script/container-stopped.sh
 
 
 # Define Environment variable
