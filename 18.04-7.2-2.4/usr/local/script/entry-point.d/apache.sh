@@ -1,1 +1,0 @@
-../../../../../16.04-7.0-2.4/usr/local/script/entry-point.d/apache.sh

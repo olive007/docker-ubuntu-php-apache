@@ -1,6 +1,7 @@
 FROM olive007/ubuntu:16.04
 MAINTAINER SECRET Olivier (olivier@devolive.be)
 
+ARG GIT_URL=https://raw.githubusercontent.com/olive007/docker-commonFile
 ARG PHP_VERSION=7.0
 
 # Install php7.0 and apache2
@@ -59,11 +60,11 @@ VOLUME /var/www/html
 
 # Add file to get server information
 RUN mkdir /var/www/info
-ADD var/www/info/index.html /var/www/info/index.html
-ADD var/www/info/phpinfo.php /var/www/info/phpinfo.php
+ADD $GIT_URL/master/var/www/info/index.html /var/www/info/index.html 
+ADD $GIT_URL/master/var/www/info/phpinfo.php /var/www/info/phpinfo.php 
 
 # Add configuration file for apache
-ADD etc/apache2/sites-available/000-info.conf /etc/apache2/sites-available/000-info.conf
+ADD $GIT_URL/master/etc/apache2/sites-available/000-info.conf /etc/apache2/sites-available/000-info.conf
 RUN echo "Listen 88" >> /etc/apache2/ports.conf && a2ensite 000-info
 
 # Enable
@@ -74,15 +75,15 @@ RUN a2enmod info proxy_fcgi
 RUN a2dismod php$PHP_VERSION && a2enconf php$PHP_VERSION-fpm
 
 # Display the php error on the web page
-RUN sed -i 's/^display_errors = .*$/display_errors = On/' /etc/php/7.0/fpm/php.ini
+RUN sed -i 's/^display_errors = .*$/display_errors = On/' /etc/php/${PHP_VERSION}/fpm/php.ini
 
-# Fix PHP-FPM Error (unable to connect to Unix domain socket /run/php/php7.0-fpm.sock)
+# Fix PHP-FPM Error (unable to connect to Unix domain socket /run/php/${PHP_VERSION}-fpm.sock)
 RUN mkdir /run/php
 
 
 # Add script configuration for apache and php
-ADD usr/local/script/entry-point.d/apache.sh /usr/local/script/entry-point.d/apache.sh
-ADD usr/local/script/entry-point.d/php.sh /usr/local/script/entry-point.d/php.sh
+ADD $GIT_URL/master/usr/local/script/entry-point.d/apache.sh /usr/local/script/entry-point.d/apache.sh
+ADD $GIT_URL/master/usr/local/script/entry-point.d/php.sh /usr/local/script/entry-point.d/php.sh
 
 
 # Enable services
