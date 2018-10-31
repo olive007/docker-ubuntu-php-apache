@@ -96,3 +96,4 @@ RUN echo "service ssh stop" >> /usr/local/script/container-stopped.sh
 
 # Define Environment variable
 ENV XDEBUG_IDEKEY=PHPSTORM
+ENV PHP_MAX_INPUT_VARS=2000

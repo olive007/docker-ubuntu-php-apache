@@ -15,3 +15,6 @@ sed -i "s/^group =.*$/group = $CONTAINER_USER_NAME/" /etc/php/$PHP_VERSION/fpm/p
 
 sed -i "s/^listen.owner =.*$/listen.owner = $CONTAINER_USER_NAME/" /etc/php/$PHP_VERSION/fpm/pool.d/www.conf
 sed -i "s/^listen.group =.*$/listen.group = $CONTAINER_USER_NAME/" /etc/php/$PHP_VERSION/fpm/pool.d/www.conf
+
+sed -i "s/.*max_input_vars =.*$/max_input_vars = $PHP_MAX_INPUT_VARS/" /etc/php/$PHP_VERSION/fpm/php.ini
+
