@@ -1,1 +1,1 @@
-<?php phpinfo();
+../../../../16.04-7.0-2.4/var/www/info/phpinfo.php
