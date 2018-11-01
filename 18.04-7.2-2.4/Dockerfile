@@ -60,10 +60,12 @@ VOLUME /var/www/html
 # Add file to get server information
 RUN mkdir /var/www/info
 ADD $GIT_URL/master/var/www/info/index.html /var/www/info/index.html 
-ADD $GIT_URL/master/var/www/info/phpinfo.php /var/www/info/phpinfo.php 
+ADD $GIT_URL/master/var/www/info/phpinfo.php /var/www/info/phpinfo.php
+RUN chmod 644 /var/www/info/index.html /var/www/info/phpinfo.php 
 
 # Add configuration file for apache
 ADD $GIT_URL/master/etc/apache2/sites-available/000-info.conf /etc/apache2/sites-available/000-info.conf
+RUN chmod 644 /etc/apache2/sites-available/000-info.conf
 RUN echo "Listen 88" >> /etc/apache2/ports.conf && a2ensite 000-info
 
 # Enable
@@ -83,7 +85,7 @@ RUN mkdir /run/php
 # Add script configuration for apache and php
 ADD $GIT_URL/master/usr/local/script/entry-point.d/apache.sh /usr/local/script/entry-point.d/apache.sh
 ADD $GIT_URL/master/usr/local/script/entry-point.d/php.sh /usr/local/script/entry-point.d/php.sh
-
+RUN chmod 644 /usr/local/script/entry-point.d/apache.sh /usr/local/script/entry-point.d/php.sh
 
 # Enable services
 RUN echo "service php$PHP_VERSION-fpm start" >> /usr/local/script/startup.sh
@@ -96,4 +98,5 @@ RUN echo "service ssh stop" >> /usr/local/script/container-stopped.sh
 
 # Define Environment variable
 ENV XDEBUG_IDEKEY=PHPSTORM
-ENV PHP_MAX_INPUT_VARS=2000
+ENV PHP_INIT_POST_MAX_SIZE=2.2G
+ENV PHP_INIT_UPLOAD_MAX_FILESIZE=2G
