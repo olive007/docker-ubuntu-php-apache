@@ -9,7 +9,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get upgrade -y -qq && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
 						   apache2 \
-						   locales \
 						   php-xdebug \
 						   php${PHP_VERSION} \
 						   php${PHP_VERSION}-bcmath \
