@@ -45,6 +45,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
 						   php${PHP_VERSION}-xmlrpc \
 						   php${PHP_VERSION}-xsl \
 						   php${PHP_VERSION}-zip \
+						   python3 \
 						   libapache2-mod-php${PHP_VERSION} \
 						   snmp-mibs-downloader # php-snmp dependency
 

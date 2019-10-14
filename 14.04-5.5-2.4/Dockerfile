@@ -35,6 +35,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
 						   php${PHP_VERSION}-xdebug \
 						   php${PHP_VERSION}-xmlrpc \
 						   php${PHP_VERSION}-xsl \
+						   python3 \
 						   libapache2-mod-fastcgi
 
 
